@@ -1,0 +1,61 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    // El plugin de Flutter debe ir después de los plugins de Android y Kotlin.
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+import java.util.Properties
+import java.io.FileInputStream
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file("key.properties")
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace "com.vibesync.vibesync"
+    compileSdk 36
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
+
+    defaultConfig {
+        applicationId "com.vibesync.vibesync"
+        minSdk 23
+        targetSdk 35
+        versionCode flutter.versionCode
+        versionName flutter.versionName
+    }
+
+    signingConfigs {
+        release {
+            if (keystorePropertiesFile.exists()) {
+                keyAlias keystoreProperties["keyAlias"]
+                keyPassword keystoreProperties["keyPassword"]
+                storeFile file(keystoreProperties["storeFile"])
+                storePassword keystoreProperties["storePassword"]
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig keystorePropertiesFile.exists() ? signingConfigs.release : signingConfigs.debug
+            minifyEnabled false
+            shrinkResources false
+        }
+    }
+}
+
+flutter {
+    source "../.."
+}
